@@ -10,7 +10,7 @@ import 'package:notepad/model/add_note_model.dart';
 import 'package:notepad/textField/custom_text_field.dart';
 
 class AddNotePage extends StatefulWidget {
-  AddNotePage({Key? key}) : super(key: key);
+  const AddNotePage({Key? key}) : super(key: key);
 
   @override
   State<AddNotePage> createState() => _AddNotePageState();
