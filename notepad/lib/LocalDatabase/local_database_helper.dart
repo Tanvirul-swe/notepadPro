@@ -1,3 +1,4 @@
+import 'package:notepad/model/add_note_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -12,6 +13,7 @@ class DatabaseHelper {
   static const titleColumn = 'title';
   static const contentColumn = 'content';
   static const columnId = '_id';
+  static const colorCodeColumn = 'color_code';
   // Blog Table
   static const blogTableInfo = 'blog_info';
   DatabaseHelper._privateConstructor();
@@ -52,12 +54,19 @@ class DatabaseHelper {
               $columnId INTEGER PRIMARY KEY,
               $titleColumn TEXT,
               $contentColumn TEXT,
+              $colorCodeColumn TEXT,
               $dateTimeColumn INT
              )
-            )
             ''');
+      print('***** Create succesfully NoteInfo Table****');
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<int> insertNote(AddNoteModel model) async {
+    Database? db = await instance.database();
+    int id = await db!.insert(noteInfoTable, model.toMap());
+    return id;
   }
 }

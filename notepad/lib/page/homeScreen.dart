@@ -2,8 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:notepad/CustomColors/customColors.dart';
-import 'package:notepad/CustomTextStyle/textStyle.dart';
+import 'package:notepad/CustomFile/CustomColors/customColors.dart';
+import 'package:notepad/CustomFile/CustomTextStyle/textStyle.dart';
+
 import 'package:notepad/page/addNotePage.dart';
 
 class HomeScreen extends StatefulWidget {
