@@ -20,4 +20,16 @@ class AddNoteController extends ControllerMVC {
   Future<int> addNote(AddNoteModel model) async {
     return await DatabaseHelper.instance.insertNote(model);
   }
+
+  Future<int> updateNote(AddNoteModel model,int id) async {
+    return await DatabaseHelper.instance.updateNote(model,id);
+  }
+
+  Future<List<AddNoteModel>> getnoteList() async {
+    return await DatabaseHelper.instance.getallNote();
+  }
+
+  Future<AddNoteModel?> getNoteById(int id) async {
+    return await DatabaseHelper.instance.getNoteById(id);
+  }
 }

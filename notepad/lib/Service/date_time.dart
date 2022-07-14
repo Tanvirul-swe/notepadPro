@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+
 class DateTimeConvertion {
   int datetimeToMilles() {
     final DateTime currentDate = DateTime.now();
@@ -10,9 +11,11 @@ class DateTimeConvertion {
     final DateTime date2 = DateTime.fromMillisecondsSinceEpoch(milles);
     return date2.toString();
   }
-    String millesToRealDateOnly(int milles) {
+
+  String millesToRealDateOnly(int milles) {
     final DateTime date2 = DateTime.fromMillisecondsSinceEpoch(milles);
-      final date = DateFormat.yMd().format(date2);
+    final date =
+        '${DateFormat.yMMMd().format(date2)} ${DateFormat.jms().format(date2)}';
     return date.toString();
   }
 }

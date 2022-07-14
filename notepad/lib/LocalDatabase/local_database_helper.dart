@@ -14,6 +14,9 @@ class DatabaseHelper {
   static const contentColumn = 'content';
   static const columnId = '_id';
   static const colorCodeColumn = 'color_code';
+  static const columnFontSize = 'font_size';
+  static const columnIsBold = 'isBold';
+  static const columnIsItalic = 'isItalic';
   // Blog Table
   static const blogTableInfo = 'blog_info';
   DatabaseHelper._privateConstructor();
@@ -55,7 +58,10 @@ class DatabaseHelper {
               $titleColumn TEXT,
               $contentColumn TEXT,
               $colorCodeColumn TEXT,
-              $dateTimeColumn INT
+              $dateTimeColumn INT,
+              $columnFontSize REAL,
+              $columnIsBold INT,
+              $columnIsItalic INT
              )
             ''');
       print('***** Create succesfully NoteInfo Table****');
@@ -68,5 +74,41 @@ class DatabaseHelper {
     Database? db = await instance.database();
     int id = await db!.insert(noteInfoTable, model.toMap());
     return id;
+  }
+
+  Future<int> updateNote(AddNoteModel model, int id) async {
+    Database? db = await instance.database();
+    int count = await db!.update(noteInfoTable, model.toMap(),
+        where: "$columnId= ?", whereArgs: [id]);
+    return count;
+  }
+
+  Future<List<AddNoteModel>> getallNote() async {
+    Database? db = await instance.database();
+    final note = await db!.rawQuery('SELECT * FROM $noteInfoTable');
+    if (note.isNotEmpty) {
+      return note.map((c) => AddNoteModel.fromLocalDB(c)).toList();
+    } else {
+      return [];
+    }
+  }
+
+  Future<int> deleteItem(int? id) async {
+    Database? db = await instance.database();
+    int count = await db!
+        .rawDelete('DELETE FROM $noteInfoTable WHERE $columnId = ?', [id]);
+    return count;
+  }
+
+  Future<AddNoteModel?> getNoteById(int id) async {
+    Database? db = await instance.database();
+    AddNoteModel model;
+    final note = await db!
+        .rawQuery('SELECT * FROM $noteInfoTable WHERE $columnId = ?', [id]);
+    if (note.isNotEmpty) {
+      return model = AddNoteModel.fromLocalDB(note[0]);
+    } else {
+      return null;
+    }
   }
 }

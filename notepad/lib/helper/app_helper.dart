@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class AppHelper {
   late BuildContext context;
@@ -14,13 +15,15 @@ class AppHelper {
     OverlayEntry loader = OverlayEntry(builder: (context) {
       final size = MediaQuery.of(context).size;
       return Positioned(
-          height: size.height,
-          width: size.width,
-          top: 0,
-          left: 0,
-          child: const CircularProgressIndicator(
-            color: Colors.black,
-          ));
+        height: size.height,
+        width: size.width,
+        top: 0,
+        left: 0,
+        child: const SpinKitRotatingCircle(
+          color: Colors.black,
+          size: 50.0,
+        ),
+      );
     });
     return loader;
   }

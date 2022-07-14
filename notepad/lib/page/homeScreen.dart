@@ -1,11 +1,19 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:notepad/Controller/add_note_controller.dart';
 import 'package:notepad/CustomFile/CustomColors/customColors.dart';
 import 'package:notepad/CustomFile/CustomTextStyle/textStyle.dart';
+import 'package:notepad/LocalDatabase/local_database_helper.dart';
+import 'package:notepad/Service/date_time.dart';
+import 'package:notepad/helper/app_helper.dart';
+import 'package:notepad/model/add_note_model.dart';
 
 import 'package:notepad/page/addNotePage.dart';
+import 'package:notepad/page/update_note_value.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -22,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen>
   int _selectableindex = 0;
   // Used to generate random integers
   final _random = Random();
+  final AddNoteController controller = AddNoteController();
   @override
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
@@ -31,10 +40,47 @@ class _HomeScreenState extends State<HomeScreen>
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.push(
-          context, MaterialPageRoute(builder: ((context) => AddNotePage())));
+        context,
+        MaterialPageRoute(
+          builder: ((context) => AddNotePage()),
+        ),
+      ).then((value) {
+        setState(() {});
+      });
 
       _selectableindex = index;
     }
+  }
+
+  alartdialog(int? id) {
+    return showDialog(
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Do you want to delete this item?'),
+            titleTextStyle: TextStyle(fontSize: 16, color: Colors.black),
+            actions: <Widget>[
+              TextButton(
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('OK',
+                    style: TextStyle(fontSize: 16, color: Colors.black)),
+                onPressed: () async {
+                  await DatabaseHelper.instance.deleteItem(id);
+                  setState(() {});
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+        context: context);
   }
 
   @override
@@ -127,56 +173,116 @@ class _HomeScreenState extends State<HomeScreen>
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: GridView.count(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 5.0,
-                        mainAxisSpacing: 8.0,
-                        children: List.generate(10, (index) {
-                          return InkWell(
-                              onTap: () {},
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.primaries[_random
-                                          .nextInt(Colors.primaries.length)]
-                                      [_random.nextInt(9) * 100],
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        'Flutter',
-                                        style: headingStyle,
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        'Date : 25 March 2000',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                      Text(
-                                        'Hey I am flutter i here for help you.Do not wrroy',
-                                        style: TextStyle(
-                                            fontSize: 16, height: 1.75),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ));
-                        })),
+                    child: futureData(),
                   ),
-                  Text('Person'),
-                  Text('Person')
+                  Text('Person1'),
+                  Text('Person2')
                 ],
                 controller: _tabController,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget futureData() {
+    return FutureBuilder<List<AddNoteModel>>(
+      future: controller.getnoteList(),
+      builder: (context, AsyncSnapshot<List<AddNoteModel>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Center(
+              child: SpinKitFoldingCube(
+                color: Colors.white,
+                size: 50.0,
+              ),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return const Center(
+            child: Text('Something is wrrong'),
+          );
+        }
+
+        List<AddNoteModel> noteList = snapshot.data!;
+        return itemValue(noteList);
+      },
+    );
+  }
+
+  Widget itemValue(List<AddNoteModel> model) {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 5.0,
+      mainAxisSpacing: 8.0,
+      children: List.generate(
+        model.length,
+        (index) {
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UpdateNoteValue(id: model[index].id!),
+                ),
+              ).then((value) {
+                setState(() {});
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(int.parse(model[index].colorCode)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          fit: FlexFit.tight,
+                          child: Text(
+                            model[index].title,
+                            maxLines: 1,
+                            style: headingStyle.copyWith(
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              alartdialog(model[index].id);
+                            },
+                            icon: const Icon(
+                              Icons.remove_circle,
+                              size: 18,
+                              color: Colors.red,
+                            ))
+                      ],
+                    ),
+                    Text(
+                        DateTimeConvertion()
+                            .millesToRealDateOnly(model[index].dateTime),
+                        style: const TextStyle(fontSize: 12)),
+                    Text(
+                      model[index].content,
+                      maxLines: 4,
+                      style: const TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          fontSize: 16,
+                          height: 1.25),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -10,7 +10,7 @@ const tabBarTextStyle = TextStyle(
 );
 const headingStyle = TextStyle(
   color: Colors.black,
-  fontSize: 20,
+  fontSize: 17,
   fontWeight: FontWeight.bold,
 );
 const selectedLableStyle =

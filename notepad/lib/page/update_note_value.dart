@@ -4,32 +4,33 @@ import 'package:notepad/Controller/add_note_controller.dart';
 import 'package:notepad/CustomFile/CustomColors/customColors.dart';
 import 'package:notepad/CustomFile/CustomTextStyle/textStyle.dart';
 import 'package:notepad/CustomFile/custom_toest.dart';
+import 'package:notepad/LocalDatabase/local_database_helper.dart';
 
 import 'package:notepad/Service/date_time.dart';
 import 'package:notepad/model/add_note_model.dart';
 import 'package:notepad/textField/custom_text_field.dart';
 
-class AddNotePage extends StatefulWidget {
-  const AddNotePage({Key? key}) : super(key: key);
+class UpdateNoteValue extends StatefulWidget {
+  int id;
+  UpdateNoteValue({required this.id, Key? key}) : super(key: key);
 
   @override
-  State<AddNotePage> createState() => _AddNotePageState();
+  State<UpdateNoteValue> createState() => _UpdateNoteValueState();
 }
 
-class _AddNotePageState extends State<AddNotePage> {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController contentController = TextEditingController();
-  final AddNoteController addNoteController = AddNoteController();
-  Color pickerColor = Color(0xFFFFFFFF);
+class _UpdateNoteValueState extends State<UpdateNoteValue> {
+  TextEditingController titleController = TextEditingController();
+  TextEditingController contentController = TextEditingController();
+  AddNoteController addNoteController = AddNoteController();
+  Color pickerColor = Color(0xff443a49);
   Color currentColor = Color(0xff443a49);
   double fontSize = 17;
   bool isBold = false;
   bool isItalic = false;
-
+  AddNoteModel? noteModel;
   void changeColor(Color color) {
-    setState(() {
-      pickerColor = color;
-    });
+    print("Selected color ** $pickerColor");
+    setState(() => pickerColor = color);
   }
 
   alartdialog() {
@@ -62,6 +63,27 @@ class _AddNotePageState extends State<AddNotePage> {
           );
         },
         context: context);
+  }
+
+  @override
+  void initState() {
+    loadData();
+    super.initState();
+  }
+
+  loadData() async {
+    noteModel = await addNoteController.getNoteById(widget.id);
+    titleController = TextEditingController(text: noteModel!.title);
+    contentController = TextEditingController(text: noteModel!.content);
+    pickerColor = Color(int.parse(noteModel!.colorCode));
+    if (noteModel!.isBold == 1) {
+      isBold = true;
+    }
+    if (noteModel!.isItalic == 1) {
+      isItalic = true;
+    }
+    fontSize = noteModel!.fontSize;
+    setState(() {});
   }
 
   @override
@@ -114,7 +136,9 @@ class _AddNotePageState extends State<AddNotePage> {
             ),
           ),
           IconButton(
-            onPressed: () async {},
+            onPressed: () async {
+              alartdialog();
+            },
             icon: const Icon(
               Icons.alarm,
               color: iconColor,
@@ -123,23 +147,23 @@ class _AddNotePageState extends State<AddNotePage> {
           IconButton(
             onPressed: () async {
               if (_validateForm()) {
-                int id = await addNoteController.addNote(
-                  AddNoteModel(
-                    dateTime: DateTimeConvertion().datetimeToMilles(),
-                    title: titleController.text,
-                    content: contentController.text,
-                    colorCode: pickerColor.value.toString(),
-                    fontSize: fontSize,
-                    isBold: isBold?1:0,
-                    isItalic: isItalic?1:0
-                  ),
-                );
+                int id = await addNoteController.updateNote(
+                    AddNoteModel(
+                      dateTime: DateTimeConvertion().datetimeToMilles(),
+                      title: titleController.text,
+                      content: contentController.text,
+                      colorCode: pickerColor.value.toString(),
+                      fontSize: fontSize,
+                      isBold: isBold ? 1 : 0,
+                      isItalic: isItalic ? 1 : 0,
+                    ),
+                    widget.id);
                 if (id > 0) {
-                  CustomTost().customToast('Succesfull');
+                  CustomTost().customToast('Update Succesfull');
 
                   Navigator.pop(context);
                 } else {
-                  CustomTost().customToast('Data insert fail');
+                  CustomTost().customToast('Data Update fail');
                 }
               } else {
                 CustomTost().customToast('Please fill up empty field');
@@ -223,28 +247,16 @@ class _AddNotePageState extends State<AddNotePage> {
               height: 10,
             ),
             Expanded(
-              child: Stack(
-                children: [
-                  Container(
-                    height: double.infinity,
-                    color: pickerColor,
-                    child: ContentTextField(
-                        isItalic: isItalic,
-                        isBold: isBold,
-                        color: pickerColor,
-                        controller: contentController,
-                        fontSize: fontSize,
-                        lable: 'Write something.....'),
-                  ),
-                  // Positioned(
-                  //   top: -1,
-                  //   bottom: -0,
-                  //   child: Container(
-                  //     color: Colors.amber,
-                  //     height: 50,
-                  //   ),
-                  // )
-                ],
+              child: Container(
+                color: pickerColor,
+                child: ContentTextField(
+                  isItalic: isItalic,
+                  isBold: isBold,
+                  controller: contentController,
+                  lable: 'Write something.....',
+                  color: pickerColor,
+                  fontSize: fontSize,
+                ),
               ),
             ),
           ],
