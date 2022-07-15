@@ -13,6 +13,7 @@ import 'package:notepad/helper/app_helper.dart';
 import 'package:notepad/model/add_note_model.dart';
 
 import 'package:notepad/page/addNotePage.dart';
+import 'package:notepad/page/profile.dart';
 import 'package:notepad/page/update_note_value.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -42,12 +43,20 @@ class _HomeScreenState extends State<HomeScreen>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: ((context) => AddNotePage()),
+          builder: ((context) => const AddNotePage()),
         ),
       ).then((value) {
         setState(() {});
       });
 
+      _selectableindex = index;
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: ((context) => Profile()),
+        ),
+      );
       _selectableindex = index;
     }
   }
@@ -56,12 +65,12 @@ class _HomeScreenState extends State<HomeScreen>
     return showDialog(
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Do you want to delete this item?'),
-            titleTextStyle: TextStyle(fontSize: 16, color: Colors.black),
+            title: const Text('Do you want to delete this item?'),
+            titleTextStyle: const TextStyle(fontSize: 16, color: Colors.black),
             actions: <Widget>[
               TextButton(
                 child: const Text(
-                  'Cancel',
+                  'No',
                   style: TextStyle(fontSize: 16, color: Colors.black),
                 ),
                 onPressed: () {
@@ -69,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen>
                 },
               ),
               TextButton(
-                child: const Text('OK',
+                child: const Text('Yes',
                     style: TextStyle(fontSize: 16, color: Colors.black)),
                 onPressed: () async {
                   await DatabaseHelper.instance.deleteItem(id);
@@ -250,6 +259,7 @@ class _HomeScreenState extends State<HomeScreen>
                             model[index].title,
                             maxLines: 1,
                             style: headingStyle.copyWith(
+                              color: Colors.white,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -261,18 +271,20 @@ class _HomeScreenState extends State<HomeScreen>
                             icon: const Icon(
                               Icons.remove_circle,
                               size: 18,
-                              color: Colors.red,
+                              color: Colors.white,
                             ))
                       ],
                     ),
                     Text(
                         DateTimeConvertion()
                             .millesToRealDateOnly(model[index].dateTime),
-                        style: const TextStyle(fontSize: 12)),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.white)),
                     Text(
                       model[index].content,
                       maxLines: 4,
                       style: const TextStyle(
+                          color: Colors.white,
                           overflow: TextOverflow.ellipsis,
                           fontSize: 16,
                           height: 1.25),

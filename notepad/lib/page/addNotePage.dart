@@ -20,7 +20,7 @@ class _AddNotePageState extends State<AddNotePage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
   final AddNoteController addNoteController = AddNoteController();
-  Color pickerColor = Color(0xFFFFFFFF);
+  Color pickerColor = Color(0xff443a49);
   Color currentColor = Color(0xff443a49);
   double fontSize = 17;
   bool isBold = false;
@@ -29,6 +29,7 @@ class _AddNotePageState extends State<AddNotePage> {
   void changeColor(Color color) {
     setState(() {
       pickerColor = color;
+      print('Picked color ${pickerColor.value}');
     });
   }
 
@@ -92,7 +93,7 @@ class _AddNotePageState extends State<AddNotePage> {
                 alartdialog();
               },
               child: Container(
-                padding: EdgeInsets.all(3),
+                padding: const EdgeInsets.all(3),
                 width: 50,
                 decoration: BoxDecoration(
                     boxShadow: [
@@ -125,14 +126,13 @@ class _AddNotePageState extends State<AddNotePage> {
               if (_validateForm()) {
                 int id = await addNoteController.addNote(
                   AddNoteModel(
-                    dateTime: DateTimeConvertion().datetimeToMilles(),
-                    title: titleController.text,
-                    content: contentController.text,
-                    colorCode: pickerColor.value.toString(),
-                    fontSize: fontSize,
-                    isBold: isBold?1:0,
-                    isItalic: isItalic?1:0
-                  ),
+                      dateTime: DateTimeConvertion().datetimeToMilles(),
+                      title: titleController.text,
+                      content: contentController.text,
+                      colorCode: pickerColor.value.toString(),
+                      fontSize: fontSize,
+                      isBold: isBold ? 1 : 0,
+                      isItalic: isItalic ? 1 : 0),
                 );
                 if (id > 0) {
                   CustomTost().customToast('Succesfull');
@@ -236,14 +236,6 @@ class _AddNotePageState extends State<AddNotePage> {
                         fontSize: fontSize,
                         lable: 'Write something.....'),
                   ),
-                  // Positioned(
-                  //   top: -1,
-                  //   bottom: -0,
-                  //   child: Container(
-                  //     color: Colors.amber,
-                  //     height: 50,
-                  //   ),
-                  // )
                 ],
               ),
             ),

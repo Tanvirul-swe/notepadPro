@@ -57,8 +57,8 @@ class ContentTextField extends StatelessWidget {
       style: TextStyle(
           fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
           fontSize: fontSize,
-          fontStyle: isItalic? FontStyle.italic:FontStyle.normal
-          ),
+          fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+          color: Colors.white),
       decoration: InputDecoration(
         filled: true,
         fillColor: color,
