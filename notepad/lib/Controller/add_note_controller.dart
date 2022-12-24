@@ -32,4 +32,8 @@ class AddNoteController extends ControllerMVC {
   Future<AddNoteModel?> getNoteById(int id) async {
     return await DatabaseHelper.instance.getNoteById(id);
   }
+  Future<List<AddNoteModel>> searchNote(String query) async {
+    final data = await DatabaseHelper.instance.searchnote(query);
+    return data;
+  }
 }

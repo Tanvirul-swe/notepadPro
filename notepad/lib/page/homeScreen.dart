@@ -1,23 +1,19 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 import 'package:notepad/Controller/add_note_controller.dart';
 import 'package:notepad/CustomFile/CustomColors/customColors.dart';
 import 'package:notepad/CustomFile/CustomTextStyle/textStyle.dart';
+import 'package:notepad/CustomFile/common_widget.dart/common_widget.dart';
+import 'package:notepad/CustomFile/common_widget.dart/custom_search_bar.dart';
 import 'package:notepad/LocalDatabase/local_database_helper.dart';
 import 'package:notepad/Service/date_time.dart';
 import 'package:notepad/helper/app_helper.dart';
+import 'package:notepad/helper/size_config.dart';
 import 'package:notepad/model/add_note_model.dart';
 
-import 'package:notepad/page/addNotePage.dart';
-import 'package:notepad/page/profile.dart';
-import 'package:notepad/page/update_note_value.dart';
-
 class HomeScreen extends StatefulWidget {
-  HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -25,193 +21,135 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  TabController? _tabController;
   final _listItems = List.generate(200, (i) => "Item $i");
   // ignore: prefer_final_fields
-  int _selectableindex = 0;
   // Used to generate random integers
   final _random = Random();
   final AddNoteController controller = AddNoteController();
-  @override
-  void initState() {
-    _tabController = TabController(length: 3, vsync: this);
-    super.initState();
-  }
 
-  void _onItemTapped(int index) {
-    if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: ((context) => const AddNotePage()),
-        ),
-      ).then((value) {
-        setState(() {});
+  Future<List<AddNoteModel>>? noteList;
+
+  TextEditingController searchTextFieldController = TextEditingController();
+  void filterSearch(String query) async {
+    searchTextFieldController.text = query;
+    if (query.length > 2) {
+      Future<List<AddNoteModel>> data = controller.searchNote(query);
+      setState(() {
+        noteList = data;
       });
-
-      _selectableindex = index;
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: ((context) => Profile()),
-        ),
-      );
-      _selectableindex = index;
+    } else if (query.isEmpty) {
+      Future<List<AddNoteModel>>? data = controller.getnoteList();
+      setState(() {
+        noteList = data;
+      });
     }
   }
 
-  alartdialog(int? id) {
-    return showDialog(
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Do you want to delete this item?'),
-            titleTextStyle: const TextStyle(fontSize: 16, color: Colors.black),
-            actions: <Widget>[
-              TextButton(
-                child: const Text(
-                  'No',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Yes',
-                    style: TextStyle(fontSize: 16, color: Colors.black)),
-                onPressed: () async {
-                  await DatabaseHelper.instance.deleteItem(id);
-                  setState(() {});
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-        context: context);
+  @override
+  void initState() {
+    noteList = controller.getnoteList().then((value) {
+      setState(() {});
+      return value;
+    });
+
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColor.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColor.backgroundColor,
         elevation: 0,
         title: const Text(
-          'Hi Michal\nGood Morning',
-          style: TappbarTitleStyle,
+          'Note',
+          style: headingStyle,
         ),
-        actions: const [
-          Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                child: CircleAvatar(
-                  backgroundImage: AssetImage('Assets/images/addimage.png'),
-                ),
-              ))
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-          unselectedLabelStyle:
-              const TextStyle(color: Colors.green, fontSize: 13),
-          unselectedItemColor: iconColor,
-          selectedItemColor: iconColor,
-          currentIndex: _selectableindex,
-          onTap: _onItemTapped,
-          items: [
-            const BottomNavigationBarItem(
-                label: 'Add Note', icon: Icon(Icons.add_circle_outline)),
-            BottomNavigationBarItem(
-                label: 'Profile',
-                icon: SvgPicture.asset(
-                  'Assets/images/profile.svg',
-                  width: 20,
-                  height: 20,
-                  color: iconColor,
-                )),
-          ]),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 50,
-              child: TextField(
-                decoration: InputDecoration(
-                    filled: true,
-                    fillColor: textFieldColor,
-                    border: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.yellow, width: 0.0),
-                        borderRadius: BorderRadius.circular(8)),
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    hintText: 'Search',
-                    hintStyle: const TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w400),
-                    prefixIconColor: iconColor,
-                    prefixIcon: const Icon(Icons.search_outlined)),
-              ),
-            ),
-            TabBar(
-              indicatorColor: Colors.blueAccent,
-              unselectedLabelColor: const Color(0xFF808080),
-              labelColor: Colors.black,
-              labelStyle: selectedLableStyle,
-              unselectedLabelStyle: tabBarTextStyle,
-              tabs: const [
-                Tab(
-                  text: 'Note',
-                ),
-                Tab(
-                  child: Text('To Do'),
-                ),
-                Tab(
-                  text: 'Blogs',
-                )
-              ],
-              controller: _tabController,
-              indicatorSize: TabBarIndicatorSize.tab,
-            ),
-            Expanded(
-              child: TabBarView(
+        actions: [
+          Stack(
+            children: [
+              Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: futureData(),
+                    padding: const EdgeInsets.only(right: 20, top: 8),
+                    child: AnimSearchBar(
+                      color: AppColor.bottomColor,
+                      searchIconColor: AppColor.whiteColor,
+                      width: SizeConfig.screenWidth / 1.35,
+                      textController: searchTextFieldController,
+                      onSuffixTap: () {
+                        setState(() {
+                          searchTextFieldController.clear();
+                        });
+                      },
+                      onChange: (p0) {
+                        filterSearch(p0);
+                      },
+                      onSubmitted: (String value) {},
+                    ),
                   ),
-                  Text('Person1'),
-                  Text('Person2')
+                  Padding(
+                      padding: const EdgeInsets.only(right: 10, top: 8),
+                      child: actionBottom(
+                        icon: Icons.help_outline_outlined,
+                        onPress: () {},
+                      )),
                 ],
-                controller: _tabController,
-              ),
-            ),
-          ],
+              )
+            ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(
+          Icons.add,
+          size: 35,
         ),
+        backgroundColor: AppColor.bottomColor,
+        onPressed: () {
+          Navigator.pushNamed(context, '/AddNotePage');
+        },
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: RefreshIndicator(
+            onRefresh: () {
+              return Future.delayed(
+                const Duration(seconds: 1),
+                () {
+                  setState(() {});
+                },
+              );
+            },
+            child: futureData()),
       ),
     );
   }
 
   Widget futureData() {
     return FutureBuilder<List<AddNoteModel>>(
-      future: controller.getnoteList(),
+      future: noteList,
       builder: (context, AsyncSnapshot<List<AddNoteModel>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Center(
-              child: SpinKitFoldingCube(
-                color: Colors.white,
-                size: 50.0,
-              ),
-            ),
-          );
+          return builderLoader(SizeConfig.screenHeight, SizeConfig.screenWidth);
         } else if (snapshot.hasError) {
-          return const Center(
-            child: Text('Something is wrrong'),
+          return AppHelper.of(context).errorView();
+        }
+        if (snapshot.data!.isEmpty) {
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppHelper.of(context).emptyView(),
+                const Text(
+                  "Create your first note",
+                  style: bodyStyle,
+                )
+              ],
+            ),
           );
         }
 
@@ -222,80 +160,52 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget itemValue(List<AddNoteModel> model) {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 5.0,
-      mainAxisSpacing: 8.0,
-      children: List.generate(
-        model.length,
-        (index) {
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UpdateNoteValue(id: model[index].id!),
-                ),
-              ).then((value) {
-                setState(() {});
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(int.parse(model[index].colorCode)),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          fit: FlexFit.tight,
-                          child: Text(
-                            model[index].title,
-                            maxLines: 1,
-                            style: headingStyle.copyWith(
-                              color: Colors.white,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                            onPressed: () {
-                              alartdialog(model[index].id);
-                            },
-                            icon: const Icon(
-                              Icons.remove_circle,
-                              size: 18,
-                              color: Colors.white,
-                            ))
-                      ],
-                    ),
-                    Text(
-                        DateTimeConvertion()
-                            .millesToRealDateOnly(model[index].dateTime),
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.white)),
-                    Text(
-                      model[index].content,
-                      maxLines: 4,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          overflow: TextOverflow.ellipsis,
-                          fontSize: 16,
-                          height: 1.25),
-                    ),
-                  ],
-                ),
-              ),
+    return ListView.separated(
+      padding: const EdgeInsets.all(10),
+      itemCount: model.length,
+      shrinkWrap: true,
+      itemBuilder: (BuildContext context, int index) {
+        return GestureDetector(
+          onTap: (() {
+            Navigator.pushNamed(context, '/NoteViewScreen',
+                    arguments: model[index].id)
+                .then((value) {
+              setState(() {});
+            });
+          }),
+          child: Container(
+            height: 110,
+            padding: const EdgeInsets.all(12),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Color(int.parse(model[index].colorCode)),
             ),
-          );
-        },
-      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  DateTimeConvertion()
+                      .millesToRealDateOnly(model[index].dateTime),
+                  style: smallTextStyle,
+                ),
+                Text(
+                  model[index].title,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: bodyStyle,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return const SizedBox(
+          height: 20,
+        );
+      },
     );
   }
 }

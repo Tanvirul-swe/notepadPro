@@ -3,16 +3,16 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:notepad/Controller/add_note_controller.dart';
 import 'package:notepad/CustomFile/CustomColors/customColors.dart';
 import 'package:notepad/CustomFile/CustomTextStyle/textStyle.dart';
+import 'package:notepad/CustomFile/common_widget.dart/common_widget.dart';
 import 'package:notepad/CustomFile/custom_toest.dart';
-import 'package:notepad/LocalDatabase/local_database_helper.dart';
 
 import 'package:notepad/Service/date_time.dart';
 import 'package:notepad/model/add_note_model.dart';
 import 'package:notepad/textField/custom_text_field.dart';
 
 class UpdateNoteValue extends StatefulWidget {
-  int id;
-  UpdateNoteValue({required this.id, Key? key}) : super(key: key);
+  final int id;
+  const UpdateNoteValue({required this.id, Key? key}) : super(key: key);
 
   @override
   State<UpdateNoteValue> createState() => _UpdateNoteValueState();
@@ -22,8 +22,8 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   AddNoteController addNoteController = AddNoteController();
-  Color pickerColor = Color(0xff443a49);
-  Color currentColor = Color(0xff443a49);
+  Color pickerColor = const Color(0xff443a49);
+  Color currentColor = const Color(0xff443a49);
   double fontSize = 17;
   bool isBold = false;
   bool isItalic = false;
@@ -90,21 +90,18 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: addNoteController.scaffoldKey,
+      backgroundColor: AppColor.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColor.backgroundColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios_new_outlined,
-            color: iconColor,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10, top: 8),
+          child: actionBottom(
+            icon: Icons.arrow_back_ios_new,
+            onPress: () {
+              Navigator.pop(context);
+            },
           ),
-        ),
-        title: const Text(
-          'Add Notes',
-          style: TappbarTitleStyle,
         ),
         actions: [
           Padding(
@@ -114,18 +111,19 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
                 alartdialog();
               },
               child: Container(
-                padding: EdgeInsets.all(3),
+                padding: const EdgeInsets.all(3),
                 width: 50,
-                decoration: BoxDecoration(
+                height: 50,
+                decoration: const BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.grey.withOpacity(0.4),
+                          color: AppColor.whiteColor,
                           spreadRadius: 2,
                           blurRadius: 4,
-                          offset: const Offset(0, 3)),
+                          offset: Offset(0, 3)),
                     ],
                     color: Colors.black45,
-                    borderRadius: const BorderRadius.all(Radius.circular(8))),
+                    borderRadius: BorderRadius.all(Radius.circular(8))),
                 child: Container(
                   width: 50,
                   decoration: BoxDecoration(
@@ -135,55 +133,49 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () async {
-              alartdialog();
-            },
-            icon: const Icon(
-              Icons.alarm,
-              color: iconColor,
-            ),
+          const SizedBox(
+            width: 10,
           ),
-          IconButton(
-            onPressed: () async {
-              if (_validateForm()) {
-                int id = await addNoteController.updateNote(
-                    AddNoteModel(
-                      dateTime: DateTimeConvertion().datetimeToMilles(),
-                      title: titleController.text,
-                      content: contentController.text,
-                      colorCode: pickerColor.value.toString(),
-                      fontSize: fontSize,
-                      isBold: isBold ? 1 : 0,
-                      isItalic: isItalic ? 1 : 0,
-                    ),
-                    widget.id);
-                if (id > 0) {
-                  CustomTost().customToast('Update Succesfull');
+          Padding(
+              padding: const EdgeInsets.only(right: 20, top: 8),
+              child: actionBottom(
+                icon: Icons.save_outlined,
+                onPress: () async {
+                  if (_validateForm()) {
+                    int id = await addNoteController.updateNote(
+                        AddNoteModel(
+                          dateTime: DateTimeConvertion().datetimeToMilles(),
+                          title: titleController.text,
+                          content: contentController.text,
+                          colorCode: pickerColor.value.toString(),
+                          fontSize: fontSize,
+                          isBold: isBold ? 1 : 0,
+                          isItalic: isItalic ? 1 : 0,
+                        ),
+                        widget.id);
+                    if (id > 0) {
+                      showCustomSnackBar(context, 'Update Succesfull');
 
-                  Navigator.pop(context);
-                } else {
-                  CustomTost().customToast('Data Update fail');
-                }
-              } else {
-                CustomTost().customToast('Please fill up empty field');
-              }
-            },
-            icon: const Icon(
-              Icons.check,
-              color: iconColor,
-            ),
-          )
+                      Navigator.pop(context);
+                    } else {
+                      showCustomSnackBar(context, 'Data Update fail');
+
+                      CustomTost().customToast('Data Update fail');
+                    }
+                  } else {
+                    showCustomSnackBar(context, 'Please fill up empty field');
+                  }
+                },
+              )),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        elevation: 5,
+        elevation: 0,
+        color: AppColor.backgroundColor,
         child: Padding(
           padding: const EdgeInsets.all(5),
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
-            // color: Colors.grey,
-            // height: 70,
             child: Row(
               children: [
                 IconButton(
@@ -192,7 +184,10 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
                       fontSize++;
                     });
                   },
-                  icon: Icon(Icons.text_increase),
+                  icon: const Icon(
+                    Icons.text_increase,
+                    color: AppColor.whiteColor,
+                  ),
                 ),
                 IconButton(
                   onPressed: () {
@@ -200,7 +195,10 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
                       fontSize--;
                     });
                   },
-                  icon: Icon(Icons.text_decrease),
+                  icon: const Icon(
+                    Icons.text_decrease,
+                    color: AppColor.whiteColor,
+                  ),
                 ),
                 IconButton(
                   onPressed: () {
@@ -214,7 +212,7 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
                   },
                   icon: Icon(
                     Icons.format_bold,
-                    color: isBold ? Colors.amber : Colors.black,
+                    color: isBold ? Colors.amber : AppColor.whiteColor,
                   ),
                 ),
                 IconButton(
@@ -229,7 +227,7 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
                   },
                   icon: Icon(
                     Icons.format_italic,
-                    color: isItalic ? Colors.amber : Colors.black,
+                    color: isItalic ? Colors.amber : AppColor.whiteColor,
                   ),
                 ),
               ],
@@ -248,7 +246,7 @@ class _UpdateNoteValueState extends State<UpdateNoteValue> {
             ),
             Expanded(
               child: Container(
-                color: pickerColor,
+                color: AppColor.backgroundColor,
                 child: ContentTextField(
                   isItalic: isItalic,
                   isBold: isBold,

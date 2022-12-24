@@ -111,4 +111,17 @@ class DatabaseHelper {
       return null;
     }
   }
+
+  Future<List<AddNoteModel>> searchnote(String query) async {
+    List<AddNoteModel> noteList = [];
+    Database? db = await instance.database();
+    var note = await db!.rawQuery(
+        'select * from $noteInfoTable where $titleColumn LIKE ? order by $titleColumn',
+        ['%$query%']);
+
+    if (note.isNotEmpty) {
+      noteList = note.map((c) => AddNoteModel.fromLocalDB(c)).toList();
+    }
+    return Future.value(noteList);
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:notepad/Controller/add_note_controller.dart';
 import 'package:notepad/CustomFile/CustomColors/customColors.dart';
 import 'package:notepad/CustomFile/CustomTextStyle/textStyle.dart';
+import 'package:notepad/CustomFile/common_widget.dart/common_widget.dart';
 import 'package:notepad/CustomFile/custom_toest.dart';
 
 import 'package:notepad/Service/date_time.dart';
@@ -20,8 +21,8 @@ class _AddNotePageState extends State<AddNotePage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
   final AddNoteController addNoteController = AddNoteController();
-  Color pickerColor = Color(0xff443a49);
-  Color currentColor = Color(0xff443a49);
+  Color pickerColor = const Color(0xff443a49);
+  Color currentColor = const Color(0xff443a49);
   double fontSize = 17;
   bool isBold = false;
   bool isItalic = false;
@@ -29,7 +30,6 @@ class _AddNotePageState extends State<AddNotePage> {
   void changeColor(Color color) {
     setState(() {
       pickerColor = color;
-      print('Picked color ${pickerColor.value}');
     });
   }
 
@@ -70,20 +70,16 @@ class _AddNotePageState extends State<AddNotePage> {
     return Scaffold(
       key: addNoteController.scaffoldKey,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColor.backgroundColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios_new_outlined,
-            color: iconColor,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10, top: 8),
+          child: actionBottom(
+            icon: Icons.arrow_back_ios_new,
+            onPress: () {
+              Navigator.pop(context);
+            },
           ),
-        ),
-        title: const Text(
-          'Add Notes',
-          style: TappbarTitleStyle,
         ),
         actions: [
           Padding(
@@ -95,16 +91,17 @@ class _AddNotePageState extends State<AddNotePage> {
               child: Container(
                 padding: const EdgeInsets.all(3),
                 width: 50,
-                decoration: BoxDecoration(
+                height: 50,
+                decoration: const BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.grey.withOpacity(0.4),
+                          color: AppColor.whiteColor,
                           spreadRadius: 2,
                           blurRadius: 4,
-                          offset: const Offset(0, 3)),
+                          offset: Offset(0, 3)),
                     ],
                     color: Colors.black45,
-                    borderRadius: const BorderRadius.all(Radius.circular(8))),
+                    borderRadius: BorderRadius.all(Radius.circular(8))),
                 child: Container(
                   width: 50,
                   decoration: BoxDecoration(
@@ -114,49 +111,45 @@ class _AddNotePageState extends State<AddNotePage> {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () async {},
-            icon: const Icon(
-              Icons.alarm,
-              color: iconColor,
-            ),
+          const SizedBox(
+            width: 10,
           ),
-          IconButton(
-            onPressed: () async {
-              if (_validateForm()) {
-                int id = await addNoteController.addNote(
-                  AddNoteModel(
-                      dateTime: DateTimeConvertion().datetimeToMilles(),
-                      title: titleController.text,
-                      content: contentController.text,
-                      colorCode: pickerColor.value.toString(),
-                      fontSize: fontSize,
-                      isBold: isBold ? 1 : 0,
-                      isItalic: isItalic ? 1 : 0),
-                );
-                if (id > 0) {
-                  CustomTost().customToast('Succesfull');
+          Padding(
+              padding: const EdgeInsets.only(right: 20, top: 8),
+              child: actionBottom(
+                icon: Icons.save_outlined,
+                onPress: () async {
+                  if (_validateForm()) {
+                    int id = await addNoteController.addNote(
+                      AddNoteModel(
+                          dateTime: DateTimeConvertion().datetimeToMilles(),
+                          title: titleController.text,
+                          content: contentController.text,
+                          colorCode: pickerColor.value.toString(),
+                          fontSize: fontSize,
+                          isBold: isBold ? 1 : 0,
+                          isItalic: isItalic ? 1 : 0),
+                    );
+                    if (id > 0) {
+                      CustomTost().customToast('Succesfull');
 
-                  Navigator.pop(context);
-                } else {
-                  CustomTost().customToast('Data insert fail');
-                }
-              } else {
-                CustomTost().customToast('Please fill up empty field');
-              }
-            },
-            icon: const Icon(
-              Icons.check,
-              color: iconColor,
-            ),
-          )
+                      Navigator.pop(context);
+                    } else {
+                      CustomTost().customToast('Data insert fail');
+                    }
+                  } else {
+                    CustomTost().customToast('Please fill up empty field');
+                  }
+                },
+              )),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        elevation: 5,
+        color: AppColor.backgroundColor,
+        elevation: 0,
         child: Padding(
           padding: const EdgeInsets.all(5),
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
             // color: Colors.grey,
             // height: 70,
@@ -168,7 +161,10 @@ class _AddNotePageState extends State<AddNotePage> {
                       fontSize++;
                     });
                   },
-                  icon: Icon(Icons.text_increase),
+                  icon: const Icon(
+                    Icons.text_increase,
+                    color: AppColor.whiteColor,
+                  ),
                 ),
                 IconButton(
                   onPressed: () {
@@ -176,7 +172,10 @@ class _AddNotePageState extends State<AddNotePage> {
                       fontSize--;
                     });
                   },
-                  icon: Icon(Icons.text_decrease),
+                  icon: const Icon(
+                    Icons.text_decrease,
+                    color: AppColor.whiteColor,
+                  ),
                 ),
                 IconButton(
                   onPressed: () {
@@ -190,7 +189,7 @@ class _AddNotePageState extends State<AddNotePage> {
                   },
                   icon: Icon(
                     Icons.format_bold,
-                    color: isBold ? Colors.amber : Colors.black,
+                    color: isBold ? Colors.amber : AppColor.whiteColor,
                   ),
                 ),
                 IconButton(
@@ -205,7 +204,7 @@ class _AddNotePageState extends State<AddNotePage> {
                   },
                   icon: Icon(
                     Icons.format_italic,
-                    color: isItalic ? Colors.amber : Colors.black,
+                    color: isItalic ? Colors.amber : AppColor.whiteColor,
                   ),
                 ),
               ],
@@ -219,15 +218,12 @@ class _AddNotePageState extends State<AddNotePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TitleTextIField(controller: titleController, lable: 'Title'),
-            const SizedBox(
-              height: 10,
-            ),
             Expanded(
               child: Stack(
                 children: [
                   Container(
                     height: double.infinity,
-                    color: pickerColor,
+                    color: AppColor.backgroundColor,
                     child: ContentTextField(
                         isItalic: isItalic,
                         isBold: isBold,
